@@ -22,6 +22,7 @@ You'd use this module like this:
     ```
 """
 
+from contextlib import contextmanager
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import matplotlib.patches as patches
@@ -45,6 +46,86 @@ epoch_gradient = [
   '#384193', '#3A388B', '#393082', '#38287A', '#372071', '#351867',
   '#350D5F', '#340057',
 ]
+
+# Property reference: https://matplotlib.org/stable/users/explain/customizing.html#customizing-with-style-sheets
+
+epoch_rc = {
+    'text': {
+        'color': text_color,
+    },
+
+    'patch': {
+        'linewidth': 0.5,
+    },
+
+    'xtick': {
+        'labelsize': 10,
+        'direction': 'out',
+        'color': frame_color,
+        'labelcolor': tick_label_color,
+        'major.size': 6,
+        'minor.size': 6,
+    },
+
+    'ytick': {
+        'labelsize': 10,
+        'direction': 'in',
+        'color': frame_color,
+        'labelcolor': tick_label_color,
+        'major.size': 6,
+        'minor.size': 6,
+    },
+
+    'lines': {
+        'linewidth': 1.5,
+    },
+
+    'font': {
+        'family': 'Messina Sans',
+    },
+
+    'grid': {
+        'color': '#EBF5F4',
+        'linestyle': '-',
+        'linewidth': 1,
+    },
+
+    'axes': {
+        'linewidth': 1,
+        'edgecolor': frame_color,
+        'labelcolor': axis_label_color,
+        'labelsize': 12,
+        'labelweight': 'bold',
+        'grid': True,
+        'axisbelow': True,
+        'facecolor': 'white',
+    },
+
+    'legend': {
+        'loc': 'upper right',
+        'frameon': False,
+        'handlelength': 0.8,
+        'handleheight': 0.8,
+        'borderaxespad': 0,
+        'borderpad': 0,
+        'fontsize': 10,
+    },
+
+    'figure': {
+        'subplot.wspace': 0.05,
+    }
+}
+
+processed_rc_params = {}
+for key, value in epoch_rc.items():
+    if isinstance(value, dict):
+        for subkey, subvalue in value.items():
+            processed_rc_params[f"{key}.{subkey}"] = subvalue
+    else:
+        processed_rc_params[key] = value
+
+epoch_rc = processed_rc_params
+
 
 
 def get_gradient_colors(n):
@@ -84,91 +165,18 @@ def px_to_y_fraction(px, ax=None):
     return y_fraction
 
 
+@contextmanager
+def epoch_theme():
+    """Use this context manager to set the Epoch theme only for a specific block of code."""
+    with mpl.rc_context(mpl.rcParamsDefault):
+        with mpl.rc_context(epoch_rc):
+            yield
+
+
 def set_epoch_theme(dpi=None):
     """Sets the theme for Matplotlib to the Epoch style. Call this once at the beginning of your script."""
-
-    if dpi is None:
-        dpi = mpl.rcParams['figure.dpi']
-
-    # Property reference: https://matplotlib.org/stable/users/explain/customizing.html#customizing-with-style-sheets
-
-    rc_params = {
-        'text': {
-            'color': text_color,
-        },
-
-        'patch': {
-            'linewidth': 0.5,
-        },
-
-        'xtick': {
-            'labelsize': 10,
-            'direction': 'out',
-            'color': frame_color,
-            'labelcolor': tick_label_color,
-            'major.size': 6,
-            'minor.size': 6,
-        },
-
-        'ytick': {
-            'labelsize': 10,
-            'direction': 'in',
-            'color': frame_color,
-            'labelcolor': tick_label_color,
-            'major.size': 6,
-            'minor.size': 6,
-        },
-
-        'lines': {
-            'linewidth': 1.5,
-        },
-
-        'font': {
-            'family': 'Messina Sans',
-        },
-
-        'grid': {
-            'color': '#EBF5F4',
-            'linestyle': '-',
-            'linewidth': 1,
-        },
-
-        'axes': {
-            'linewidth': 1,
-            'edgecolor': frame_color,
-            'labelcolor': axis_label_color,
-            'labelsize': 12,
-            'labelweight': 'bold',
-            'grid': True,
-            'axisbelow': True,
-            'facecolor': 'white',
-        },
-
-        'legend': {
-            'loc': 'upper right',
-            'frameon': False,
-            'handlelength': 0.8,
-            'handleheight': 0.8,
-            'borderaxespad': 0,
-            'borderpad': 0,
-            'fontsize': 10,
-        },
-
-        'figure': {
-            'subplot.wspace': 0.05,
-        }
-    }
-
-    processed_rc_params = {}
-    for key, value in rc_params.items():
-        if isinstance(value, dict):
-            for subkey, subvalue in value.items():
-                processed_rc_params[f"{key}.{subkey}"] = subvalue
-        else:
-            processed_rc_params[key] = value
-
     mpl.rcParams.update(mpl.rcParamsDefault)
-    mpl.rcParams.update(processed_rc_params)
+    mpl.rcParams.update(epoch_rc)
 
 
 def relayout(fig=None, legend={}):
