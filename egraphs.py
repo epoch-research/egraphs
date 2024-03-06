@@ -20,6 +20,22 @@ You'd use this module like this:
 
     plt.show()
     ```
+
+or using the context manager like this
+
+    ```
+    import matplotlib.pyplot as plt
+    import egraphs
+
+    with egraphs.epoch_theme():
+        # Create your figure like you normally would
+        plt.plot([1, 2, 3], [4, 5, 6])
+
+        # Update the layout of the figure after creating it
+        egraphs.relayout()
+
+        plt.show()
+    ```
 """
 
 from contextlib import contextmanager
