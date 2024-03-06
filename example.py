@@ -14,11 +14,11 @@ def example1():
 
     plt.show()
 
-
-def example2():
-    # Reset style
+    # Reset the style
     plt.style.use('default')
 
+
+def example2():
     # Use a context manager to set the theme only for a specific block of code
     with egraphs.epoch_theme():
         # Create your figure like you normally would
@@ -34,6 +34,18 @@ def example2():
     plt.show()
 
 
+def example_braces():
+    with egraphs.epoch_theme():
+        plot()
+
+        egraphs.relayout()
+
+        # Add braces only after relayout
+        egraphs.add_brace(plt.gca(), 1, 4, 6, transform=plt.gca().transData)
+
+        plt.show()
+
+
 def plot():
     plt.plot([1, 2, 3], [4, 5.5, 6], label='Pretty line #1')
     plt.plot([1, 2, 3], [4, 5, 6], label='Pretty line #2')
@@ -45,3 +57,4 @@ def plot():
 if __name__ == '__main__':
     example1()
     example2()
+    example_braces()

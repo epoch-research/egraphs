@@ -44,6 +44,7 @@ import matplotlib.lines as mlines
 import matplotlib.patches as patches
 from matplotlib.collections import PolyCollection
 import matplotlib as mpl
+from matplotlib.path import Path
 
 
 frame_color        = '#CCD8D9'
@@ -302,7 +303,12 @@ def relayout(fig=None, legend={}):
 
 
 def add_brace(ax, left, bottom, top, transform=None, color='black'):
-    """Add a brace. It's experimental right now!"""
+    """
+    Add a brace. Call this after relayout().
+
+    It's experimental right now!
+    """
+
     font = {}
     bool_auto = True
 
@@ -320,7 +326,7 @@ def add_brace(ax, left, bottom, top, transform=None, color='black'):
     #right = 50 + 30
 
     # Extracted from an SVG
-    points = np.array([
+    points = [
         [0.     , 0.     ], # MOVETO [0]
         [0.     , 0.     ], # LINETO [1]
 
@@ -351,29 +357,31 @@ def add_brace(ax, left, bottom, top, transform=None, color='black'):
         [0.     , 7.2407 ], # CURVE4 [17]
 
         [0.     , 7.2407 ], # LINETO [18]
-    ])
+    ]
 
     target_width = 15
 
-    points[:, 0] *= target_width
-    points[:, 1] *= target_width
+    for point in points:
+        point[0] *= target_width
+        point[1] *= target_width
 
     # Increase the height of the brace by augmenting the length of the straight segments
     target_height = top - bottom
 
-    current_height = points[-1, 1]
+    current_height = points[-1][1]
     remaining_height = target_height - current_height
 
     # increase first line segment length
     for i in range(5, len(points)):
-        points[i, 1] += remaining_height/2
+        points[i][1] += remaining_height/2
 
     # increase second line segment length
     for i in range(14, len(points)):
-        points[i, 1] += remaining_height/2
+        points[i][1] += remaining_height/2
 
-    points[:, 0] += left
-    points[:, 1] += bottom
+    for point in points:
+        point[0] += left
+        point[1] += bottom
 
     commands = [
         Path.MOVETO,
