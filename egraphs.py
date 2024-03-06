@@ -299,3 +299,99 @@ def relayout(fig=None, legend={}):
 
     ax = fig.axes[0]
     fig.subplots_adjust(left=px_to_x_fraction(40, ax), right=1-px_to_x_fraction(20, ax), bottom=px_to_y_fraction(50, ax), top=0.9)
+
+
+def add_brace(ax, left, bottom, top, transform=None, color='black'):
+    """Add a brace. It's experimental right now!"""
+    font = {}
+    bool_auto = True
+
+    if transform:
+        # force an update
+        ax.get_xbound()
+        ax.get_ybound()
+
+        left, top = transform.transform((left, top))
+        right, bottom = transform.transform((0, bottom))
+
+    #top = 400
+    #bottom = 10
+    #left = 50
+    #right = 50 + 30
+
+    # Extracted from an SVG
+    points = np.array([
+        [0.     , 0.     ], # MOVETO [0]
+        [0.     , 0.     ], # LINETO [1]
+
+        [0.37308, 0.     ], # CURVE4 [2]
+        [0.67555, 0.30246], # CURVE4 [3]
+        [0.67555, 0.67556], # CURVE4 [4]
+
+        [0.67555, 2.99492], # LINETO [5]
+
+        [0.67555, 3.23316], # CURVE4 [6]
+        [0.77621, 3.46029], # CURVE4 [7]
+        [0.95272, 3.62035], # CURVE4 [8]
+
+        [0.95272, 3.62035], # LINETO [9]
+
+        # middle point
+
+        [0.95272, 3.62035], # LINETO [10]
+
+        [0.77621, 3.7804 ], # CURVE4 [11]
+        [0.67555, 4.00753], # CURVE4 [12]
+        [0.67555, 4.24578], # CURVE4 [13]
+
+        [0.67555, 6.56515], # LINETO [14]
+
+        [0.67555, 6.93823], # CURVE4 [15]
+        [0.37308, 7.2407 ], # CURVE4 [16]
+        [0.     , 7.2407 ], # CURVE4 [17]
+
+        [0.     , 7.2407 ], # LINETO [18]
+    ])
+
+    target_width = 15
+
+    points[:, 0] *= target_width
+    points[:, 1] *= target_width
+
+    # Increase the height of the brace by augmenting the length of the straight segments
+    target_height = top - bottom
+
+    current_height = points[-1, 1]
+    remaining_height = target_height - current_height
+
+    # increase first line segment length
+    for i in range(5, len(points)):
+        points[i, 1] += remaining_height/2
+
+    # increase second line segment length
+    for i in range(14, len(points)):
+        points[i, 1] += remaining_height/2
+
+    points[:, 0] += left
+    points[:, 1] += bottom
+
+    commands = [
+        Path.MOVETO,
+        Path.LINETO,
+        Path.CURVE4, Path.CURVE4, Path.CURVE4,
+        Path.LINETO,
+        Path.CURVE4, Path.CURVE4, Path.CURVE4,
+        Path.LINETO,
+
+        # middle point
+
+        Path.LINETO,
+        Path.CURVE4, Path.CURVE4, Path.CURVE4,
+        Path.LINETO,
+        Path.CURVE4, Path.CURVE4, Path.CURVE4,
+        Path.LINETO,
+    ]
+
+    path = Path(points, commands)
+
+    ax.add_patch(patches.PathPatch(path, facecolor='none', lw=1, edgecolor=color, zorder=10, transform=None, clip_on=False))
