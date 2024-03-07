@@ -222,7 +222,7 @@ def relayout(fig=None, replace_legend=False, legend={}):
 
             ax.yaxis.label.set_position((0.0, 1.0 + 15 * pixel_to_y_fraction))
 
-        ax.xaxis.set_label_coords(0.5, px_to_y_fraction(-35, ax))
+        ax.xaxis.set_label_coords(0.5, px_to_y_fraction(-40, ax))
 
         # If there's a legend, make it horizontal and place it on top
         if ax.get_legend():
