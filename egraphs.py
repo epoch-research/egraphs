@@ -121,7 +121,7 @@ epoch_rc = {
     'legend': {
         'loc': 'upper right',
         'frameon': False,
-        'handlelength': 0.8,
+        'handlelength': 1.4,
         'handleheight': 0.8,
         'borderaxespad': 0,
         'borderpad': 0,
@@ -196,11 +196,12 @@ def set_epoch_theme(dpi=None):
     mpl.rcParams.update(epoch_rc)
 
 
-def relayout(fig=None, legend={}):
+def relayout(fig=None, replace_legend=False, legend={}):
     """
     Updates the layout of the figure to match the Epoch style. Call this after creating your figure.
 
-    This function destroys the legend and manually recreates it. This is to give us more control over it.
+    If `replace_legend` is True, this function destroys the legend and manually recreates it (experimental).
+    This is to give us more control over it in the future.
     """
 
     if fig is None:
@@ -225,77 +226,79 @@ def relayout(fig=None, legend={}):
 
         # If there's a legend, make it horizontal and place it on top
         if ax.get_legend():
-            handles, labels = ax.get_legend_handles_labels()
+            if not replace_legend:
+                # move the legend to the top
+                ax.legend(loc='upper right', bbox_to_anchor=(1.0, 1.06), ncol=len(ax.get_legend().legendHandles))
+            else:
+                handles, labels = ax.get_legend_handles_labels()
 
-            ax.get_legend().remove()
+                ax.get_legend().remove()
 
-            legend_items = [('blue', 'Ligne Bleue'), ('green', 'Ligne Verte')]
+                symbol_width = legend.get('symbol_width', 12) * pixel_to_x_fraction
+                item_spacing = legend.get('symbol_width', 8) * pixel_to_x_fraction
+                symbol_label_spacing = 4 * pixel_to_x_fraction
 
-            symbol_width = legend.get('symbol_width', 12) * pixel_to_x_fraction
-            item_spacing = legend.get('symbol_width', 8) * pixel_to_x_fraction
-            symbol_label_spacing = 4 * pixel_to_x_fraction
+                pos_x = 0
+                pos_y = 1.065
 
-            pos_x = 0
-            pos_y = 1.065
+                legend_items = []
 
-            legend_items = []
+                for item_index, (handle, label) in enumerate(zip(handles, labels)):
+                    if isinstance(handle, mlines.Line2D):
+                        color = handle.get_color()
+                        dash = handle.get_linestyle()
+                        offset, dash_pattern = handle._unscaled_dash_pattern
+                        linestyle = (offset, [p/3 for p in dash_pattern]) if dash_pattern else '-'
+                        symbol = mlines.Line2D([pos_x, pos_x + symbol_width], [pos_y, pos_y], color=color, linestyle=linestyle, linewidth=1.5, transform=ax.transAxes)
+                    elif isinstance(handle, PolyCollection):
+                        facecolor = handle.get_facecolor()[0]
+                        edgecolor = handle.get_edgecolor()[0]
+                        symbol_height = symbol_width / pixel_to_x_fraction * pixel_to_y_fraction
+                        symbol = patches.Rectangle((pos_x, pos_y - 0.5 * symbol_height), symbol_width,
+                                symbol_height, facecolor=facecolor, edgecolor=edgecolor, transform=ax.transAxes)
+                    elif isinstance(handle, patches.Rectangle):
+                        facecolor = handle.get_facecolor()
+                        #edgecolor = handle.get_edgecolor()
+                        symbol_height = symbol_width / pixel_to_x_fraction * pixel_to_y_fraction
+                        symbol = patches.Rectangle((pos_x, pos_y - 0.5 * symbol_height), symbol_width,
+                                symbol_height, facecolor=facecolor, transform=ax.transAxes)
+                    else:
+                        raise NotImplementedError(f'Handle for {type(handle)} not implemented')
 
-            for item_index, (handle, label) in enumerate(zip(handles, labels)):
-                if isinstance(handle, mlines.Line2D):
-                    color = handle.get_color()
-                    dash = handle.get_linestyle()
-                    offset, dash_pattern = handle._unscaled_dash_pattern
-                    linestyle = (offset, [p/3 for p in dash_pattern]) if dash_pattern else '-'
-                    symbol = mlines.Line2D([pos_x, pos_x + symbol_width], [pos_y, pos_y], color=color, linestyle=linestyle, linewidth=1.5, transform=ax.transAxes)
-                elif isinstance(handle, PolyCollection):
-                    facecolor = handle.get_facecolor()[0]
-                    edgecolor = handle.get_edgecolor()[0]
-                    symbol_height = symbol_width / pixel_to_x_fraction * pixel_to_y_fraction
-                    symbol = patches.Rectangle((pos_x, pos_y - 0.5 * symbol_height), symbol_width,
-                            symbol_height, facecolor=facecolor, edgecolor=edgecolor, transform=ax.transAxes)
-                elif isinstance(handle, patches.Rectangle):
-                    facecolor = handle.get_facecolor()
-                    #edgecolor = handle.get_edgecolor()
-                    symbol_height = symbol_width / pixel_to_x_fraction * pixel_to_y_fraction
-                    symbol = patches.Rectangle((pos_x, pos_y - 0.5 * symbol_height), symbol_width,
-                            symbol_height, facecolor=facecolor, transform=ax.transAxes)
-                else:
-                    raise NotImplementedError(f'Handle for {type(handle)} not implemented')
+                    ax.add_artist(symbol)
+                    symbol.set_clip_on(False)
+                    legend_items.append(symbol)
+                    ax.add_line(mlines.Line2D([0, 1], [pos_y, pos_y], color='black', linestyle='--', transform=ax.transAxes))
 
-                ax.add_artist(symbol)
-                symbol.set_clip_on(False)
-                legend_items.append(symbol)
-                ax.add_line(mlines.Line2D([0, 1], [pos_y, pos_y], color='black', linestyle='--', transform=ax.transAxes))
+                    pos_x += symbol_width
+                    pos_x += symbol_label_spacing
+                    
+                    v_center_adjustment = -0.8 * pixel_to_y_fraction # Matplotlib's centering is not great
+                    text = ax.text(pos_x, pos_y + v_center_adjustment, label, size=10, transform=ax.transAxes, verticalalignment='center', color=legend_label_color, fontweight='medium')
+                    text_width = ax.transAxes.inverted().transform_bbox(text.get_window_extent()).width
+                    legend_items.append(text)
 
-                pos_x += symbol_width
-                pos_x += symbol_label_spacing
-                
-                v_center_adjustment = -0.8 * pixel_to_y_fraction # Matplotlib's centering is not great
-                text = ax.text(pos_x, pos_y + v_center_adjustment, label, size=10, transform=ax.transAxes, verticalalignment='center', color=legend_label_color, fontweight='medium')
-                text_width = ax.transAxes.inverted().transform_bbox(text.get_window_extent()).width
-                legend_items.append(text)
+                    pos_x += text_width
 
-                pos_x += text_width
+                    if item_index < len(handles) - 1:
+                        pos_x += item_spacing
 
-                if item_index < len(handles) - 1:
-                    pos_x += item_spacing
+                max_x = max([ax.transAxes.inverted().transform_bbox(item.get_window_extent()).x1 for item in legend_items])
 
-            max_x = max([ax.transAxes.inverted().transform_bbox(item.get_window_extent()).x1 for item in legend_items])
+                for item in legend_items:
+                    # Displace them to the right border
+                    # TODO: This is probably a very crappy way to do this
 
-            for item in legend_items:
-                # Displace them to the right border
-                # TODO: This is probably a very crappy way to do this
+                    displacement = 1 - max_x
 
-                displacement = 1 - max_x
-
-                if isinstance(item, mlines.Line2D):
-                    x_data = item.get_xdata()
-                    item.set_xdata([x_data[0] + displacement, x_data[1] + displacement])
-                elif isinstance(item, patches.Rectangle):
-                    x_data = item.get_x()
-                    item.set_x(x_data + displacement)
-                elif isinstance(item, mpl.text.Text):
-                    item.set_x(item.get_position()[0] + displacement)
+                    if isinstance(item, mlines.Line2D):
+                        x_data = item.get_xdata()
+                        item.set_xdata([x_data[0] + displacement, x_data[1] + displacement])
+                    elif isinstance(item, patches.Rectangle):
+                        x_data = item.get_x()
+                        item.set_x(x_data + displacement)
+                    elif isinstance(item, mpl.text.Text):
+                        item.set_x(item.get_position()[0] + displacement)
 
 
     ax = fig.axes[0]
@@ -319,11 +322,6 @@ def add_brace(ax, left, bottom, top, transform=None, color='black'):
 
         left, top = transform.transform((left, top))
         right, bottom = transform.transform((0, bottom))
-
-    #top = 400
-    #bottom = 10
-    #left = 50
-    #right = 50 + 30
 
     # Extracted from an SVG
     points = [
