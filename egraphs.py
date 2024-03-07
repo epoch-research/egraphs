@@ -355,7 +355,7 @@ def relayout(fig=None, replace_legend=False, legend={}, padding={}):
     #fig.subplots_adjust(left=px_to_x_fraction(40, ax), right=1-px_to_x_fraction(20, ax), bottom=px_to_y_fraction(50, ax), top=0.9)
 
 
-def add_brace(ax, left, bottom, top, transform=None, color='black'):
+def add_brace(ax, left, bottom, top, transform=None, linewidth=1, color='black'):
     """
     Add a brace. Call this after relayout().
 
@@ -457,4 +457,4 @@ def add_brace(ax, left, bottom, top, transform=None, color='black'):
 
     path = Path(points, commands)
 
-    ax.add_patch(patches.PathPatch(path, facecolor='none', lw=1, edgecolor=color, zorder=10, transform=ax.transAxes, clip_on=False))
+    ax.add_patch(patches.PathPatch(path, facecolor='none', linewidth=linewidth, edgecolor=color, zorder=10, transform=ax.transAxes, clip_on=False))
