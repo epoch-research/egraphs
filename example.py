@@ -10,7 +10,7 @@ def example1():
     plot()
 
     # Update the layout of the figure after creating it
-    egraphs.relayout()
+    egraphs.relayout(replace_legend=True)
 
     plt.show()
 
@@ -46,16 +46,6 @@ def example_braces():
         plt.show()
 
 
-def example_legend():
-    with egraphs.epoch_theme():
-        plot()
-        plt.legend()
-
-        egraphs.relayout()
-
-        plt.show()
-
-
 def plot():
     plt.plot([1, 2, 3], [4, 5.5, 6], label='Pretty line #1')
     plt.plot([1, 2, 3], [4, 5, 6], label='Pretty line #2')
@@ -65,7 +55,6 @@ def plot():
 
 
 if __name__ == '__main__':
-    #example1()
+    example1()
     #example2()
     #example_braces()
-    example_legend()

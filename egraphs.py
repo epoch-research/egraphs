@@ -76,7 +76,7 @@ epoch_rc = {
     },
 
     'xtick': {
-        'labelsize': 10,
+        'labelsize': 11,
         'direction': 'out',
         'color': frame_color,
         'labelcolor': tick_label_color,
@@ -85,7 +85,7 @@ epoch_rc = {
     },
 
     'ytick': {
-        'labelsize': 10,
+        'labelsize': 11,
         'direction': 'in',
         'color': frame_color,
         'labelcolor': tick_label_color,
