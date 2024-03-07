@@ -43,11 +43,12 @@ def example_braces():
         # Add braces only after relayout
         egraphs.add_brace(plt.gca(), 1, 4, 6, transform=plt.gca().transData)
 
-        plt.savefig('example_braces.pdf')
+        plt.savefig('example_braces.svg')
         plt.show()
 
 
 def plot():
+    plt.figure(figsize=egraphs.px_to_in((660, 440)))
     plt.plot([1, 2, 3], [4, 5.5, 6], label='Pretty line #1')
     plt.plot([1, 2, 3], [4, 5, 6], label='Pretty line #2')
     plt.xlabel('X label')

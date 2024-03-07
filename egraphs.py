@@ -53,8 +53,6 @@ text_color         = '#2B424B'
 axis_label_color   = text_color
 legend_label_color = text_color
 
-default_ppi = 72
-
 epoch_gradient = [
   '#D7FDDD', '#C9F6D8', '#BAF0D3', '#ACE9CE', '#9EE3C9', '#8FDCC4',
   '#80D5BF', '#72CFBA', '#60C8B7', '#4DC1B3', '#3ABAB0', '#26B3AD',
@@ -150,11 +148,13 @@ def get_gradient_colors(n):
     return [epoch_gradient[int(i/(n - 1) * (len(epoch_gradient) - 1))] for i in range(n)]
 
 
-def in_to_px(inches, ppi=default_ppi):
+def in_to_px(inches, ppi=None):
+    if ppi is None: ppi = mpl.rcParams['figure.dpi']
     return [inch * ppi for inch in inches] if isinstance(inches, tuple) else inches * ppi
 
 
-def px_to_in(pixels, ppi=default_ppi):
+def px_to_in(pixels, ppi=None):
+    if ppi is None: ppi = mpl.rcParams['figure.dpi']
     return [pixel / ppi for pixel in pixels] if isinstance(pixels, tuple) else pixels / ppi
 
 
@@ -219,7 +219,6 @@ def relayout(fig=None, replace_legend=False, legend={}):
         if ax.get_ylabel():
             ax.yaxis.label.set_rotation(0)
             ax.yaxis.label.set_horizontalalignment('left')
-
             ax.yaxis.label.set_position((0.0, 1.0 + 15 * pixel_to_y_fraction))
 
         ax.xaxis.set_label_coords(0.5, px_to_y_fraction(-40, ax))
