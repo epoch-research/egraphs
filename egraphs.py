@@ -45,6 +45,8 @@ import matplotlib.patches as patches
 from matplotlib.collections import PolyCollection
 import matplotlib as mpl
 from matplotlib.path import Path
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from math import inf
 
 
 frame_color        = '#CCD8D9'
@@ -196,7 +198,7 @@ def set_epoch_theme(dpi=None):
     mpl.rcParams.update(epoch_rc)
 
 
-def relayout(fig=None, replace_legend=False, legend={}):
+def relayout(fig=None, replace_legend=False, legend={}, padding={}):
     """
     Updates the layout of the figure to match the Epoch style. Call this after creating your figure.
 
@@ -299,9 +301,58 @@ def relayout(fig=None, replace_legend=False, legend={}):
                     elif isinstance(item, mpl.text.Text):
                         item.set_x(item.get_position()[0] + displacement)
 
+    # Tight layout while maintaining the figure dimensions
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    fig.canvas.draw()
 
-    ax = fig.axes[0]
-    fig.subplots_adjust(left=px_to_x_fraction(40, ax), right=1-px_to_x_fraction(20, ax), bottom=px_to_y_fraction(50, ax), top=0.9)
+    min_x0 = inf
+    max_x1 = -inf
+    min_y0 = inf
+    max_y1 = -inf
+
+    for ax in fig.axes:
+        bounds = ax.get_tightbbox(fig.canvas.get_renderer())
+        min_x0 = min(min_x0, bounds.x0)
+        max_x1 = max(max_x1, bounds.x1)
+        min_y0 = min(min_y0, bounds.y0)
+        max_y1 = max(max_y1, bounds.y1)
+
+        # get_tightbbox doesn't take into account the height of the y label, for some reason
+        if ax.get_ylabel():
+            y_label_h = ax.yaxis.label.get_window_extent().height
+            max_y1 += y_label_h
+        # get_tightbbox also seems to cut a bit the x label? maybe I'm just doing something wrong
+
+    size_px = in_to_px(fig.get_size_inches(), ppi=fig.dpi)
+
+    # paddings in display units
+    left_padding   = padding.get('left', 20)
+    right_padding  = padding.get('right', 20)
+    top_padding    = padding.get('top', 20)
+    bottom_padding = padding.get('bottom', 20)
+
+    min_x0 -= left_padding
+    max_x1 += right_padding
+    min_y0 -= bottom_padding
+    max_y1 += top_padding
+
+    bbox_w = max_x1 - min_x0
+    bbox_h = max_y1 - min_y0
+
+    bottom = -min_y0 / bbox_h
+    top = (size_px[1] - min_y0) / bbox_h
+
+    left = -min_x0 / bbox_w
+    right = (size_px[0] - min_x0) / bbox_w
+
+    fig.subplots_adjust(left=left, right=right, bottom=bottom, top=top)
+
+    # Add some padding
+
+    #bbox_frac = bbox.transformed(fig.transFigure.inverted())
+    #print(bbox_frac)
+
+    #fig.subplots_adjust(left=px_to_x_fraction(40, ax), right=1-px_to_x_fraction(20, ax), bottom=px_to_y_fraction(50, ax), top=0.9)
 
 
 def add_brace(ax, left, bottom, top, transform=None, color='black'):
