@@ -43,6 +43,7 @@ def example_braces():
         # Add braces only after relayout
         egraphs.add_brace(plt.gca(), 1, 4, 6, transform=plt.gca().transData)
 
+        plt.savefig('example_braces.pdf')
         plt.show()
 
 
@@ -55,6 +56,6 @@ def plot():
 
 
 if __name__ == '__main__':
-    example1()
+    #example1()
     #example2()
-    #example_braces()
+    example_braces()

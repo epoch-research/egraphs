@@ -398,6 +398,13 @@ def add_brace(ax, left, bottom, top, transform=None, color='black'):
         Path.LINETO,
     ]
 
+    # Convert to axes coordinates
+    print(points)
+    for point in points:
+        #point[0], point[1] = ax.transData.transform((point[0], point[1]))
+        # apply inverse
+        point[0], point[1] = ax.transAxes.inverted().transform((point[0], point[1]))
+
     path = Path(points, commands)
 
-    ax.add_patch(patches.PathPatch(path, facecolor='none', lw=1, edgecolor=color, zorder=10, transform=None, clip_on=False))
+    ax.add_patch(patches.PathPatch(path, facecolor='none', lw=1, edgecolor=color, zorder=10, transform=ax.transAxes, clip_on=False))
