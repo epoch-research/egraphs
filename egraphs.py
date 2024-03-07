@@ -228,7 +228,7 @@ def relayout(fig=None, replace_legend=False, legend={}):
         if ax.get_legend():
             if not replace_legend:
                 # move the legend to the top
-                ax.legend(loc='upper right', bbox_to_anchor=(1.0, 1.06), ncol=len(ax.get_legend().legendHandles))
+                ax.legend(loc='upper right', bbox_to_anchor=(1.0, 1.06), ncol=len(ax.get_legend().legendHandles), **legend)
             else:
                 handles, labels = ax.get_legend_handles_labels()
 
