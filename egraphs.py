@@ -223,7 +223,9 @@ def relayout(fig=None, replace_legend=False, legend={}, padding={}):
             ax.yaxis.label.set_horizontalalignment('left')
             ax.yaxis.label.set_position((0.0, 1.0 + 15 * pixel_to_y_fraction))
 
-        ax.xaxis.set_label_coords(0.5, px_to_y_fraction(-40, ax))
+        #ax.xaxis.set_label_coords(0.5, px_to_y_fraction(-40, ax))
+        # set label pad
+        ax.xaxis.labelpad = 10
 
         # If there's a legend, make it horizontal and place it on top
         if ax.get_legend():
@@ -317,11 +319,21 @@ def relayout(fig=None, replace_legend=False, legend={}, padding={}):
         min_y0 = min(min_y0, bounds.y0)
         max_y1 = max(max_y1, bounds.y1)
 
-        # get_tightbbox doesn't take into account the height of the y label, for some reason
+        print(ax.xaxis.label)
+        if ax.get_xlabel():
+            bounds = ax.xaxis.label.get_tightbbox(fig.canvas.get_renderer())
+            min_x0 = min(min_x0, bounds.x0)
+            max_x1 = max(max_x1, bounds.x1)
+            min_y0 = min(min_y0, bounds.y0)
+            max_y1 = max(max_y1, bounds.y1)
+
+        print(ax.xaxis.label)
         if ax.get_ylabel():
-            y_label_h = ax.yaxis.label.get_window_extent().height
-            max_y1 += y_label_h
-        # get_tightbbox also seems to cut a bit the x label? maybe I'm just doing something wrong
+            bounds = ax.yaxis.label.get_tightbbox(fig.canvas.get_renderer())
+            min_x0 = min(min_x0, bounds.x0)
+            max_x1 = max(max_x1, bounds.x1)
+            min_y0 = min(min_y0, bounds.y0)
+            max_y1 = max(max_y1, bounds.y1)
 
     size_px = in_to_px(fig.get_size_inches(), ppi=fig.dpi)
 
@@ -346,13 +358,6 @@ def relayout(fig=None, replace_legend=False, legend={}, padding={}):
     right = (size_px[0] - min_x0) / bbox_w
 
     fig.subplots_adjust(left=left, right=right, bottom=bottom, top=top)
-
-    # Add some padding
-
-    #bbox_frac = bbox.transformed(fig.transFigure.inverted())
-    #print(bbox_frac)
-
-    #fig.subplots_adjust(left=px_to_x_fraction(40, ax), right=1-px_to_x_fraction(20, ax), bottom=px_to_y_fraction(50, ax), top=0.9)
 
 
 def add_brace(ax, left, bottom, top, transform=None, linewidth=1, color='black'):
