@@ -149,6 +149,8 @@ def get_gradient_colors(n):
     """Returns a list of `n` colors from the Epoch gradient."""
     return [epoch_gradient[int(i/(n - 1) * (len(epoch_gradient) - 1))] for i in range(n)]
 
+def px_to_pt(px):
+    return px * 72 / 96
 
 def in_to_px(inches, ppi=None):
     if ppi is None: ppi = mpl.rcParams['figure.dpi']
