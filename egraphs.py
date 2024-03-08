@@ -198,7 +198,7 @@ def set_epoch_theme(dpi=None):
     mpl.rcParams.update(epoch_rc)
 
 
-def relayout(fig=None, replace_legend=False, legend={}, padding={}):
+def relayout(fig=None, replace_legend=False, legend={}, padding={}, xaxis={}):
     """
     Updates the layout of the figure to match the Epoch style. Call this after creating your figure.
 
@@ -225,7 +225,7 @@ def relayout(fig=None, replace_legend=False, legend={}, padding={}):
 
         #ax.xaxis.set_label_coords(0.5, px_to_y_fraction(-40, ax))
         # set label pad
-        ax.xaxis.labelpad = 10
+        ax.xaxis.labelpad = xaxis.get('labelpad', 10)
 
         # If there's a legend, make it horizontal and place it on top
         if ax.get_legend():
@@ -319,7 +319,6 @@ def relayout(fig=None, replace_legend=False, legend={}, padding={}):
         min_y0 = min(min_y0, bounds.y0)
         max_y1 = max(max_y1, bounds.y1)
 
-        print(ax.xaxis.label)
         if ax.get_xlabel():
             bounds = ax.xaxis.label.get_tightbbox(fig.canvas.get_renderer())
             min_x0 = min(min_x0, bounds.x0)
@@ -327,7 +326,6 @@ def relayout(fig=None, replace_legend=False, legend={}, padding={}):
             min_y0 = min(min_y0, bounds.y0)
             max_y1 = max(max_y1, bounds.y1)
 
-        print(ax.xaxis.label)
         if ax.get_ylabel():
             bounds = ax.yaxis.label.get_tightbbox(fig.canvas.get_renderer())
             min_x0 = min(min_x0, bounds.x0)
@@ -454,7 +452,6 @@ def add_brace(ax, left, bottom, top, transform=None, linewidth=1, color='black')
     ]
 
     # Convert to axes coordinates
-    print(points)
     for point in points:
         #point[0], point[1] = ax.transData.transform((point[0], point[1]))
         # apply inverse
