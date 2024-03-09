@@ -223,7 +223,7 @@ def relayout(fig=None, replace_legend=False, legend={}, padding={}, xaxis={}, ya
         if ax.get_ylabel():
             ax.yaxis.label.set_rotation(0)
             ax.yaxis.label.set_horizontalalignment('left')
-            ax.yaxis.label.set_position((0.0, yaxis.get('labeloffset', 1.0 + 15 * pixel_to_y_fraction)))
+            ax.yaxis.label.set_position((0.0, 1 + yaxis.get('labeloffset', 15 * pixel_to_y_fraction)))
 
         #ax.xaxis.set_label_coords(0.5, px_to_y_fraction(-40, ax))
         # set label pad
