@@ -200,7 +200,7 @@ def set_epoch_theme(dpi=None):
     mpl.rcParams.update(epoch_rc)
 
 
-def relayout(fig=None, replace_legend=False, legend={}, padding={}, xaxis={}):
+def relayout(fig=None, replace_legend=False, legend={}, padding={}, xaxis={}, yaxis={}):
     """
     Updates the layout of the figure to match the Epoch style. Call this after creating your figure.
 
@@ -223,7 +223,7 @@ def relayout(fig=None, replace_legend=False, legend={}, padding={}, xaxis={}):
         if ax.get_ylabel():
             ax.yaxis.label.set_rotation(0)
             ax.yaxis.label.set_horizontalalignment('left')
-            ax.yaxis.label.set_position((0.0, 1.0 + 15 * pixel_to_y_fraction))
+            ax.yaxis.label.set_position((0.0, yaxis.get('labeloffset', 1.0 + 15 * pixel_to_y_fraction)))
 
         #ax.xaxis.set_label_coords(0.5, px_to_y_fraction(-40, ax))
         # set label pad
